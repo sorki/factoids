@@ -1,0 +1,61 @@
+name:                factoids
+version:             0.1.0.0
+synopsis:            Factoid database
+-- description:         Something a bit longer
+homepage:            https://github.com/sorki/factoids
+license:             BSD3
+license-file:        LICENSE
+author:              Richard Marko
+maintainer:          srk@48.io
+copyright:           2020 Richard Marko
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+
+extra-source-files:
+    CHANGELOG.md
+    LICENSE
+    README.md
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Data.Factoid
+                     , Data.Factoid.Schema
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , time
+                     , esqueleto
+                     , persistent
+                     , persistent-sqlite
+                     , persistent-template
+                     , monad-logger
+                     , pretty-simple
+                     , transformers
+                     , resourcet
+  default-language:    Haskell2010
+
+executable factoids-exe
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , bytestring
+                     , factoids
+  default-language:    Haskell2010
+
+
+-- test-suite factoids-tests
+--   type:                exitcode-stdio-1.0
+--   hs-source-dirs:      test
+--   main-is:             Spec.hs
+--   other-modules:       --ParseSpec
+--                        SpecHelper
+--   build-depends:       base >= 4.7 && < 5
+--                      , factoids
+--                      , hspec
+--                      , base16-bytestring
+--   default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/sorki/factoids
