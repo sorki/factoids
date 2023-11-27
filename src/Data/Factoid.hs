@@ -1,4 +1,5 @@
-{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Data.Factoid where
 
@@ -9,7 +10,7 @@ import Control.Monad.Trans.Reader (ReaderT)
 import Control.Monad.Trans.Resource
 import Data.Text (Text)
 import Data.Time
-import Database.Esqueleto
+import Database.Esqueleto.Experimental
 import qualified Database.Persist.Sqlite
 
 import Data.Factoid.Schema
@@ -36,16 +37,17 @@ runDefault fdb act = runner
 queryFactoids
   :: (MonadIO m, MonadLogger m)
   => SqlPersistT m ([Entity Factoid])
-queryFactoids = select $ from return
+queryFactoids = select $ from $ table @Factoid
 
 queryFactoid
   :: (MonadIO m, MonadLogger m)
   => Text
   -> SqlPersistT m ([Entity Factoid])
-queryFactoid k = select $ from $ \f -> do
-  where_ (f ^. FactoidName ==. val k)
-  limit 1
-  pure f
+queryFactoid k = select $ do
+    f <- from $ table @Factoid
+    where_ (f ^. FactoidName ==. val k)
+    limit 1
+    pure f
 
 getFact
   :: (MonadIO m, MonadLogger m)
@@ -61,10 +63,15 @@ queryFactoidHistory
   :: (MonadIO m, MonadLogger m)
   => FactoidId
   -> SqlPersistT m ([Entity FactoidHistory])
-queryFactoidHistory f = select $ from $ \(fh `InnerJoin` factoid) -> do
-  on (fh ^. FactoidHistoryRef ==. factoid ^. FactoidId)
-  where_ (fh ^. FactoidHistoryRef ==. val f)
-  return fh
+queryFactoidHistory f = do
+  select $ do
+    (fh :& factoid) <-
+      from $ table @FactoidHistory
+      `innerJoin` table @Factoid
+      `on` (\(fh :& factoid) ->
+        (fh ^. FactoidHistoryRef ==. factoid ^. FactoidId))
+    where_ (fh ^. FactoidHistoryRef ==. val f)
+    pure fh
 
 getFactHist
   :: (MonadIO m, MonadLogger m)
