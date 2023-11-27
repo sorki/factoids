@@ -108,7 +108,7 @@ forgetFact k = do
   mf <- getFact k
   case mf of
     Just f -> do
-      deleteCascade $ entityKey f
+      deleteKey $ entityKey f
       return True
     Nothing -> do
       return False

@@ -12,6 +12,7 @@
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE TypeOperators              #-}
 {-# LANGUAGE UndecidableInstances       #-}
 
 module Data.Factoid.Schema where
@@ -24,7 +25,6 @@ import qualified Database.Persist
 
 import           Database.Persist.TH         ( AtLeastOneUniqueKey(..)
                                              , OnlyOneUniqueKey(..)
-                                             , mkDeleteCascade
                                              , mkMigrate
                                              , mkPersist
                                              , persistLowerCase
@@ -35,7 +35,6 @@ import           Database.Persist.TH         ( AtLeastOneUniqueKey(..)
 import Data.Time (UTCTime)
 
 share [ mkPersist sqlSettings
-      , mkDeleteCascade sqlSettings
       , mkMigrate "migrateAll" ] [persistLowerCase|
   Factoid
     name      Text
@@ -45,7 +44,7 @@ share [ mkPersist sqlSettings
     deriving Eq Show Ord
 
   FactoidHistory
-    ref       FactoidId
+    ref       FactoidId OnDeleteCascade
     value     Text
     by        Text
     when      UTCTime
